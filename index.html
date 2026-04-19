@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burnout Wellness Dashboard</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0a0a1a;--bg2:#10102a;--bg3:#181830;
+    --surface:rgba(255,255,255,0.04);--surface2:rgba(255,255,255,0.07);
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --accent:#6c63ff;--accent2:#00d4aa;--accent3:#ff6b9d;
+    --text:#f0f0ff;--text2:rgba(240,240,255,0.6);--text3:rgba(240,240,255,0.35);
+    --red:#ff4d6d;--yellow:#ffd166;--green:#06d6a0;
+    --gold:#f5c842;--gold2:#e6a817;
+    --r:14px;--r2:20px;--r3:28px;
+  }
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 20%,rgba(108,99,255,0.12) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 80%,rgba(0,212,170,0.08) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(255,107,157,0.05) 0%,transparent 70%);animation:bgPulse 12s ease-in-out infinite alternate;pointer-events:none;z-index:0}
+  @keyframes bgPulse{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+  .particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .particle{position:absolute;width:2px;height:2px;background:var(--accent);border-radius:50%;opacity:.3;animation:float linear infinite}
+  @keyframes float{0%{transform:translateY(100vh) translateX(0);opacity:0}10%{opacity:.3}90%{opacity:.3}100%{transform:translateY(-20px) translateX(40px);opacity:0}}
+  .main{max-width:1100px;margin:0 auto;padding:24px 20px;position:relative;z-index:1}
+  .header{text-align:center;padding:40px 0 32px;animation:slideDown .7s cubic-bezier(.22,1,.36,1)}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-28px)}to{opacity:1;transform:translateY(0)}}
+  .header-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);border-radius:100px;padding:6px 14px;font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px}
+  .header-badge span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+  h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-1.5px;background:linear-gradient(135deg,#fff 0%,rgba(108,99,255,1) 40%,rgba(0,212,170,1) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+  .header-sub{color:var(--text2);font-size:1rem;margin-bottom:6px}
+  .header-date{color:var(--text3);font-size:.85rem}
+  .quick-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:28px;animation:fadeUp .7s .1s cubic-bezier(.22,1,.36,1) both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .qs{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .3s;cursor:default}
+  .qs:hover{background:var(--surface2);border-color:var(--border2);transform:translateY(-2px)}
+  .qs-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .qs-icon.purple{background:rgba(108,99,255,.2)}.qs-icon.teal{background:rgba(0,212,170,.2)}.qs-icon.pink{background:rgba(255,107,157,.2)}.qs-icon.amber{background:rgba(255,209,102,.2)}.qs-icon.gold{background:rgba(245,200,66,.2)}
+  .qs-val{font-size:1.2rem;font-weight:700;line-height:1}
+  .qs-label{font-size:.72rem;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+  .nav-tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;animation:fadeUp .7s .15s cubic-bezier(.22,1,.36,1) both}
+  .nav-tab{padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);cursor:pointer;transition:all .25s;font-weight:600;font-size:.88rem;letter-spacing:.2px;position:relative;overflow:hidden}
+  .nav-tab::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent),var(--accent2));opacity:0;transition:opacity .25s}
+  .nav-tab:hover{color:var(--text);border-color:var(--border2);transform:translateY(-1px)}
+  .nav-tab.active{color:#fff;border-color:transparent;box-shadow:0 0 20px rgba(108,99,255,.35)}
+  .nav-tab.active::after{opacity:1}
+  .nav-tab span{position:relative;z-index:1}
+  /* Premium tab special style */
+  .nav-tab.premium-tab{border-color:rgba(245,200,66,.3);background:rgba(245,200,66,.05)}
+  .nav-tab.premium-tab::after{background:linear-gradient(135deg,var(--gold2),var(--gold))}
+  .nav-tab.premium-tab.active{box-shadow:0 0 20px rgba(245,200,66,.35)}
+  .section{display:none;animation:sectionIn .4s cubic-bezier(.22,1,.36,1)}
+  @keyframes sectionIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .section.active{display:block}
+  .card{background:var(--surface);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:var(--r2);padding:32px;margin-bottom:20px;transition:all .3s;position:relative;overflow:hidden}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);pointer-events:none}
+  .card:hover{border-color:var(--border2)}
+  .card-title{font-size:1.15rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card-desc{color:var(--text2);font-size:.88rem;margin-bottom:24px;line-height:1.6}
+  .card.accent-purple::after{content:'';position:absolute;top:0;left:32px;width:48px;height:3px;background:var(--accent);border-radius:0 0 3px 3px}
+  .card.accent-teal::after{content:'';position:absolute;top:0;left:32px;width:48px;height:3px;background:var(--accent2);border-radius:0 0 3px 3px}
+  .card.accent-pink::after{content:'';position:absolute;top:0;left:32px;width:48px;height:3px;background:var(--accent3);border-radius:0 0 3px 3px}
+  .card.accent-gold{border-color:rgba(245,200,66,.2)}
+  .card.accent-gold::after{content:'';position:absolute;top:0;left:32px;width:48px;height:3px;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:0 0 3px 3px}
+  .card.accent-gold::before{background:linear-gradient(90deg,transparent,rgba(245,200,66,.12),transparent)}
+  /* Premium header glow */
+  .premium-header{background:linear-gradient(135deg,rgba(245,200,66,.08),rgba(230,168,23,.04));border:1px solid rgba(245,200,66,.25);border-radius:var(--r2);padding:28px 32px;margin-bottom:20px;position:relative;overflow:hidden}
+  .premium-header::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(245,200,66,.15),transparent 70%);pointer-events:none}
+  .premium-title{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--gold),#fff 60%,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+  .premium-sub{color:var(--text2);font-size:.9rem;line-height:1.6}
+  .premium-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(245,200,66,.2),rgba(230,168,23,.1));border:1px solid rgba(245,200,66,.4);border-radius:100px;padding:4px 12px;font-size:.75rem;color:var(--gold);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px}
+  /* Trend cards */
+  .trend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+  .trend-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;transition:all .2s}
+  .trend-card:hover{background:rgba(255,255,255,.05);border-color:var(--border2);transform:translateY(-2px)}
+  .trend-metric{font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+  .trend-val{font-size:1.5rem;font-weight:800;margin-bottom:4px}
+  .trend-arrow{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:20px}
+  .trend-up{background:rgba(6,214,160,.12);color:var(--green)}
+  .trend-down{background:rgba(255,77,109,.12);color:var(--red)}
+  .trend-stable{background:rgba(255,209,102,.1);color:var(--yellow)}
+  .trend-spark{display:flex;align-items:flex-end;gap:2px;height:32px;margin-top:10px}
+  .trend-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:height .5s}
+  /* Recommendation cards */
+  .rec-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;transition:all .2s}
+  .rec-card:hover{background:rgba(255,255,255,.05);border-color:var(--border2)}
+  .rec-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .rec-priority-high .rec-icon-wrap{background:rgba(255,77,109,.15);border:1px solid rgba(255,77,109,.25)}
+  .rec-priority-med .rec-icon-wrap{background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.2)}
+  .rec-priority-low .rec-icon-wrap{background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.2)}
+  .rec-body{flex:1}
+  .rec-title{font-size:.92rem;font-weight:700;margin-bottom:4px;color:var(--text)}
+  .rec-desc{font-size:.82rem;color:var(--text2);line-height:1.6}
+  .rec-tag{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px;margin-top:6px}
+  .tag-high{background:rgba(255,77,109,.15);color:var(--red)}
+  .tag-med{background:rgba(255,209,102,.12);color:var(--yellow)}
+  .tag-low{background:rgba(6,214,160,.12);color:var(--green)}
+  /* Weekly report */
+  .report-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+  .report-week-badge{background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);border-radius:8px;padding:6px 14px;font-size:.8rem;color:var(--accent);font-weight:600}
+  .report-score{text-align:center;padding:24px;background:rgba(255,255,255,.03);border-radius:var(--r);border:1px solid var(--border);margin-bottom:16px}
+  .report-score-val{font-size:3rem;font-weight:800;line-height:1;margin-bottom:4px}
+  .report-score-label{font-size:.8rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+  .report-score-grade{font-size:1rem;font-weight:700;margin-top:6px}
+  .report-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+  .report-metric{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+  .report-metric-label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+  .report-metric-val{font-size:1.1rem;font-weight:700;color:var(--accent)}
+  .report-metric-change{font-size:.72rem;margin-top:3px}
+  .insight-item{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.02);border-radius:var(--r);border:1px solid var(--border);margin-bottom:8px}
+  .insight-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+  .insight-text{font-size:.85rem;color:var(--text2);line-height:1.6}
+  /* Streak calendar */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+  .cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;cursor:default;transition:all .2s}
+  .cal-day.logged{background:rgba(108,99,255,.35);border:1px solid rgba(108,99,255,.5);color:var(--accent)}
+  .cal-day.empty{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text3)}
+  .cal-day.today{border-color:var(--accent2);box-shadow:0 0 8px rgba(0,212,170,.3)}
+  .cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+  .cal-header-day{text-align:center;font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;padding:2px 0}
+  /* Pattern alert */
+  .pattern-alert{padding:14px 18px;border-radius:var(--r);margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+  .pattern-alert.warn{background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.25)}
+  .pattern-alert.danger{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2)}
+  .pattern-alert.good{background:rgba(6,214,160,.08);border:1px solid rgba(6,214,160,.2)}
+  .pattern-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+  .pattern-body{flex:1}
+  .pattern-title{font-size:.88rem;font-weight:700;margin-bottom:3px}
+  .pattern-desc{font-size:.8rem;color:var(--text2);line-height:1.5}
+  /* Existing styles */
+  .form-group{margin-bottom:20px}
+  label{display:block;font-size:.83rem;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+  input[type=number],input[type=text],input[type=time],select,textarea{width:100%;padding:11px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.92rem;outline:none;transition:all .25s;font-family:inherit}
+  input::placeholder,textarea::placeholder{color:var(--text3)}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);background:rgba(108,99,255,0.07);box-shadow:0 0 0 3px rgba(108,99,255,.12)}
+  select option{background:#1a1a2e;color:#fff}
+  textarea{resize:vertical;min-height:90px;line-height:1.6}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px}
+  .mood-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:10px}
+  .mood-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 8px;color:var(--text2);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.8rem;font-weight:600}
+  .mood-btn:hover{background:var(--surface2);border-color:var(--border2);transform:translateY(-2px)}
+  .mood-btn.active{background:rgba(108,99,255,.18);border-color:rgba(108,99,255,.5);color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 20px rgba(108,99,255,.2)}
+  .mood-emoji{font-size:1.6rem;line-height:1}
+  .check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:10px}
+  .check-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .2s;user-select:none}
+  .check-item:hover{background:var(--surface2);border-color:var(--border2)}
+  .check-item.checked{background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.3);color:var(--accent2)}
+  .check-item input{display:none}
+  .check-box{width:18px;height:18px;border:1.5px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:11px}
+  .check-item.checked .check-box{background:var(--accent2);border-color:var(--accent2);color:#000}
+  .check-label{font-size:.82rem;font-weight:500}
+  .slider-wrap{margin-top:10px}
+  input[type=range]{width:100%;-webkit-appearance:none;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;outline:none;border:none;padding:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));cursor:pointer;box-shadow:0 2px 8px rgba(108,99,255,.4);transition:transform .2s}
+  input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.2)}
+  .slider-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:.75rem;color:var(--text3)}
+  .slider-cur{text-align:center;font-size:1.1rem;font-weight:700;color:var(--accent);margin-top:4px}
+  .progress-bar{height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;margin-top:14px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .progress-text{text-align:center;font-size:.8rem;color:var(--text3);margin-top:6px}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:20px 0}
+  .stat-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;transition:all .2s}
+  .stat-box:hover{background:rgba(255,255,255,.06);transform:translateY(-1px)}
+  .stat-label{font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+  .stat-value{font-size:1.05rem;font-weight:700;color:var(--accent)}
+  .btn-group{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .btn{padding:11px 22px;font-size:.88rem;font-weight:600;border:none;border-radius:var(--r);cursor:pointer;transition:all .25s;flex:1;min-width:130px;letter-spacing:.3px;position:relative;overflow:hidden}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),rgba(0,212,170,.8));color:#fff;box-shadow:0 4px 20px rgba(108,99,255,.3)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,99,255,.4)}
+  .btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1000;font-weight:700;box-shadow:0 4px 20px rgba(245,200,66,.3)}
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,200,66,.4)}
+  .btn-outline{background:transparent;color:var(--accent);border:1px solid rgba(108,99,255,.4)}
+  .btn-outline:hover{background:rgba(108,99,255,.1);transform:translateY(-2px)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .hist-item{background:rgba(108,99,255,.06);border:1px solid rgba(108,99,255,.15);border-radius:var(--r);padding:14px;margin-bottom:10px;border-left:3px solid var(--accent);animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+  .hist-date{font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+  .hist-details{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--text2)}
+  .hist-tag{background:rgba(255,255,255,.05);border-radius:6px;padding:3px 8px;border:1px solid var(--border)}
+  .toast{position:fixed;top:20px;right:20px;padding:14px 20px;border-radius:var(--r);font-size:.88rem;font-weight:600;z-index:9999;transform:translateX(120%);transition:transform .35s cubic-bezier(.22,1,.36,1);max-width:320px;backdrop-filter:blur(20px);display:flex;align-items:center;gap:10px}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:rgba(6,214,160,.15);border:1px solid rgba(6,214,160,.3);color:var(--green)}
+  .toast.info{background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);color:var(--accent)}
+  .toast.warn{background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.3);color:var(--yellow)}
+  .risk-meter{position:relative;margin:16px 0}
+  .risk-track{height:12px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+  .risk-fill{height:100%;border-radius:6px;transition:width .8s cubic-bezier(.22,1,.36,1),background .4s}
+  .risk-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:.72rem;color:var(--text3)}
+  .breathe-wrap{display:flex;flex-direction:column;align-items:center;padding:24px;gap:20px}
+  .breathe-circle{width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(108,99,255,.3),rgba(108,99,255,.05));border:2px solid rgba(108,99,255,.3);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;color:var(--accent);position:relative;cursor:pointer}
+  .breathe-ring{position:absolute;inset:-8px;border-radius:50%;border:2px solid transparent;border-top-color:var(--accent);border-right-color:var(--accent2)}
+  .breathe-circle.breathing .breathe-ring{animation:spin 4s linear infinite}
+  .breathe-circle.breathing{animation:breathe 4s ease-in-out infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+  .breathe-phase{font-size:1.1rem;font-weight:700;color:var(--text)}
+  .breathe-count{font-size:2.5rem;font-weight:800;color:var(--accent);min-width:40px;text-align:center}
+  .breathe-controls{display:flex;gap:10px}
+  .pomo-wrap{display:flex;flex-direction:column;align-items:center;padding:20px;gap:16px}
+  .pomo-ring{position:relative;width:160px;height:160px}
+  .pomo-svg{transform:rotate(-90deg)}
+  .pomo-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:8}
+  .pomo-prog{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .5s linear}
+  .pomo-time{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;font-variant-numeric:tabular-nums}
+  .pomo-label{font-size:.8rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+  .pomo-mode-btns{display:flex;gap:8px}
+  .pomo-mode{padding:7px 16px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
+  .pomo-mode.active{background:rgba(108,99,255,.2);border-color:rgba(108,99,255,.4);color:var(--accent)}
+  .chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:80px;margin:16px 0}
+  .chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .chart-bar{width:100%;border-radius:4px 4px 0 0;transition:height .5s cubic-bezier(.22,1,.36,1),background .3s;cursor:pointer;min-height:4px}
+  .chart-day{font-size:.68rem;color:var(--text3);text-transform:uppercase}
+  .chart-val{font-size:.7rem;color:var(--text3)}
+  .goal-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;transition:all .2s}
+  .goal-item:hover{background:var(--surface2)}
+  .goal-check{width:22px;height:22px;border:1.5px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s}
+  .goal-check.done{background:var(--green);border-color:var(--green);color:#000;font-size:12px}
+  .goal-text{font-size:.88rem;flex:1}
+  .goal-text.done{text-decoration:line-through;color:var(--text3)}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+  .badge-low{background:rgba(6,214,160,.15);color:var(--green);border:1px solid rgba(6,214,160,.3)}
+  .badge-moderate{background:rgba(255,209,102,.12);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
+  .badge-high{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.3)}
+  .divider{height:1px;background:var(--border);margin:24px 0}
+  @media(max-width:700px){.card{padding:20px}h1{font-size:2rem}.nav-tab{padding:9px 14px;font-size:.82rem}.mood-grid{grid-template-columns:repeat(2,1fr)}.btn-group{flex-direction:column}.btn{width:100%}.check-grid{grid-template-columns:1fr 1fr}.trend-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:480px){.main{padding:16px}.card{padding:16px}.check-grid{grid-template-columns:1fr}.quick-stats{grid-template-columns:1fr 1fr}.trend-grid{grid-template-columns:1fr}}
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(108,99,255,.4);border-radius:3px}
+  .water-cups{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .water-cup{width:36px;height:44px;border:1.5px solid rgba(0,212,170,.3);border-radius:4px 4px 6px 6px;background:rgba(0,212,170,.05);cursor:pointer;transition:all .2s;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+  .water-cup.filled{border-color:var(--accent2)}
+  .water-fill{width:100%;background:linear-gradient(180deg,rgba(0,212,170,.6),rgba(0,212,170,.4));border-radius:0 0 4px 4px;transition:height .4s cubic-bezier(.22,1,.36,1)}
+  .water-cup:hover{transform:scale(1.08)}
+  .confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;animation:confettifall 1s ease-out forwards;pointer-events:none;z-index:9999}
+  @keyframes confettifall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(80px) rotate(180deg);opacity:0}}
+  .count-badge{background:rgba(108,99,255,.2);color:var(--accent);font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:100px;border:1px solid rgba(108,99,255,.3);margin-left:auto}
+  /* WhatsApp */
+  .wa-widget{position:fixed;bottom:28px;right:28px;z-index:10000;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+  .wa-tooltip{background:rgba(10,10,26,.95);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:.82rem;font-weight:500;padding:8px 14px;border-radius:10px;white-space:nowrap;opacity:0;transform:translateX(8px);transition:all .25s;pointer-events:none;line-height:1.4;max-width:200px;text-align:right}
+  .wa-tooltip strong{color:#25D366;display:block;font-size:.88rem;margin-bottom:2px}
+  .wa-widget:hover .wa-tooltip{opacity:1;transform:translateX(0)}
+  .wa-btn{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#25D366,#128C7E);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(37,211,102,.45);transition:all .3s;position:relative;text-decoration:none}
+  .wa-btn:hover{transform:scale(1.1);box-shadow:0 6px 32px rgba(37,211,102,.6)}
+  .wa-btn:active{transform:scale(.96)}
+  .wa-btn svg{width:30px;height:30px;fill:#fff}
+  .wa-pulse{position:absolute;inset:-4px;border-radius:50%;background:rgba(37,211,102,.3);animation:waPulse 2.2s ease-out infinite}
+  .wa-pulse2{position:absolute;inset:-4px;border-radius:50%;background:rgba(37,211,102,.15);animation:waPulse 2.2s ease-out .7s infinite}
+  @keyframes waPulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.55);opacity:0}}
+  .wa-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:#ff4d6d;border-radius:50%;border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;animation:pulse 2s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+<div class="toast" id="toast"></div>
+
+<div class="main">
+  <div class="header">
+    <div class="header-badge"><span></span>Live Dashboard</div>
+    <h1>Burnout Wellness</h1>
+    <p class="header-sub">Your Personal Early Warning & Recovery System</p>
+    <p class="header-date" id="dateTime"></p>
+  </div>
+
+  <div class="quick-stats">
+    <div class="qs"><div class="qs-icon purple">😴</div><div><div class="qs-val" id="qsSleep">—</div><div class="qs-label">Sleep</div></div></div>
+    <div class="qs"><div class="qs-icon teal">⚡</div><div><div class="qs-val" id="qsEnergy">—</div><div class="qs-label">Energy</div></div></div>
+    <div class="qs"><div class="qs-icon pink">🌡</div><div><div class="qs-val" id="qsStress">—</div><div class="qs-label">Stress</div></div></div>
+    <div class="qs"><div class="qs-icon amber">🎯</div><div><div class="qs-val" id="qsMood">—</div><div class="qs-label">Mood</div></div></div>
+    <div class="qs"><div class="qs-icon purple">💧</div><div><div class="qs-val" id="qsWater">0/8</div><div class="qs-label">Water</div></div></div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('morning',this)"><span>🌅 Morning</span></button>
+    <button class="nav-tab" onclick="switchTab('night',this)"><span>🌙 Evening</span></button>
+    <button class="nav-tab" onclick="switchTab('checkin',this)"><span>📋 Check-in</span></button>
+    <button class="nav-tab" onclick="switchTab('tools',this)"><span>🧰 Tools</span></button>
+    <button class="nav-tab" onclick="switchTab('dashboard',this)"><span>📊 Dashboard</span></button>
+    <button class="nav-tab premium-tab" onclick="switchTab('premium',this)"><span>⭐ Premium</span></button>
+  </div>
+
+  <!-- MORNING -->
+  <div id="morning-section" class="section active">
+    <div class="card accent-purple">
+      <div class="card-title"><div class="qs-icon purple" style="font-size:14px">🌅</div> Morning Routine</div>
+      <p class="card-desc">Set yourself up for a successful day. Complete your morning rituals.</p>
+      <div class="form-grid">
+        <div class="form-group"><label>Sleep — Hours</label><input type="number" id="sleepHours" min="0" max="24" step="0.5" value="7" oninput="updateMornStats()"></div>
+        <div class="form-group"><label>Sleep — Minutes</label><input type="number" id="sleepMinutes" min="0" max="59" step="5" value="30" oninput="updateMornStats()"></div>
+      </div>
+      <div class="form-group">
+        <label>Sleep Quality</label>
+        <select id="sleepQuality" onchange="updateMornStats()">
+          <option value="">Select quality...</option>
+          <option value="excellent">Excellent — Felt fully rested</option>
+          <option value="good">Good — Mostly restful</option>
+          <option value="fair">Fair — Some interruptions</option>
+          <option value="poor">Poor — Restless / Disrupted</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Morning Mood</label>
+        <div class="mood-grid">
+          <button class="mood-btn active" onclick="pickMood(this,'morningMood','energetic')"><span class="mood-emoji">⚡</span><span>Energetic</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'morningMood','good')"><span class="mood-emoji">😊</span><span>Good</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'morningMood','okay')"><span class="mood-emoji">😐</span><span>Okay</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'morningMood','tired')"><span class="mood-emoji">😴</span><span>Tired</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'morningMood','anxious')"><span class="mood-emoji">😟</span><span>Anxious</span></button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label>Morning Activities</label>
+        <div class="check-grid" id="morningChecks">
+          <div class="check-item" onclick="toggleCheck(this,'morn_med')"><input type="checkbox" id="morn_med"><div class="check-box">✓</div><span class="check-label">🧘 Meditation</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'morn_ex')"><input type="checkbox" id="morn_ex"><div class="check-box">✓</div><span class="check-label">🏃 Exercise</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'morn_bf')"><input type="checkbox" id="morn_bf"><div class="check-box">✓</div><span class="check-label">🍎 Breakfast</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'morn_h2o')"><input type="checkbox" id="morn_h2o"><div class="check-box">✓</div><span class="check-label">💧 Hydration</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'morn_jour')"><input type="checkbox" id="morn_jour"><div class="check-box">✓</div><span class="check-label">📝 Journaling</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'morn_plan')"><input type="checkbox" id="morn_plan"><div class="check-box">✓</div><span class="check-label">🎯 Day Planning</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'morn_sun')"><input type="checkbox" id="morn_sun"><div class="check-box">✓</div><span class="check-label">☀️ Sunlight</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'morn_cold')"><input type="checkbox" id="morn_cold"><div class="check-box">✓</div><span class="check-label">🚿 Cold Shower</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="mornProg" style="width:0%"></div></div>
+        <div class="progress-text" id="mornProgText">0 of 8 activities</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Sleep</div><div class="stat-value" id="smSleep">—</div></div>
+        <div class="stat-box"><div class="stat-label">Quality</div><div class="stat-value" id="smQuality">—</div></div>
+        <div class="stat-box"><div class="stat-label">Mood</div><div class="stat-value" id="smMood">Energetic</div></div>
+        <div class="stat-box"><div class="stat-label">Progress</div><div class="stat-value" id="smProg">0%</div></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="saveMorning()">💾 Save Morning</button>
+        <button class="btn btn-outline" onclick="resetMorning()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between"><span>📖 Morning History</span><span class="count-badge" id="mornCount">0</span></div>
+      <div id="mornHistory"><p style="color:var(--text3);font-size:.88rem">No entries yet.</p></div>
+    </div>
+  </div>
+
+  <!-- EVENING -->
+  <div id="night-section" class="section">
+    <div class="card accent-teal">
+      <div class="card-title"><div class="qs-icon teal" style="font-size:14px">🌙</div> Evening Routine</div>
+      <p class="card-desc">Wind down intentionally for deep, restorative sleep.</p>
+      <div class="form-grid">
+        <div class="form-group"><label>Wind Down Time</label><input type="time" id="windDown" value="21:00"></div>
+        <div class="form-group"><label>Target Bedtime</label><input type="time" id="bedTime" value="22:30"></div>
+      </div>
+      <div class="form-group">
+        <label>Evening Mood</label>
+        <div class="mood-grid">
+          <button class="mood-btn active" onclick="pickMood(this,'eveningMood','relaxed')"><span class="mood-emoji">😌</span><span>Relaxed</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'eveningMood','calm')"><span class="mood-emoji">🧘</span><span>Calm</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'eveningMood','anxious')"><span class="mood-emoji">😟</span><span>Anxious</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'eveningMood','wired')"><span class="mood-emoji">🤸</span><span>Wired</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'eveningMood','grateful')"><span class="mood-emoji">🙏</span><span>Grateful</span></button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label>Evening Activities</label>
+        <div class="check-grid" id="nightChecks">
+          <div class="check-item" onclick="toggleCheck(this,'n_screen')"><input type="checkbox" id="n_screen"><div class="check-box">✓</div><span class="check-label">📵 No Screens</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'n_yoga')"><input type="checkbox" id="n_yoga"><div class="check-box">✓</div><span class="check-label">🧘 Yoga/Stretch</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'n_read')"><input type="checkbox" id="n_read"><div class="check-box">✓</div><span class="check-label">📚 Reading</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'n_tea')"><input type="checkbox" id="n_tea"><div class="check-box">✓</div><span class="check-label">🍵 Herbal Tea</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'n_breath')"><input type="checkbox" id="n_breath"><div class="check-box">✓</div><span class="check-label">💨 Breathing</span></div>
+          <div class="check-item" onclick="toggleCheck(this,'n_grat')"><input type="checkbox" id="n_grat"><div class="check-box">✓</div><span class="check-label">🤔 Gratitude</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="nightProg" style="width:0%"></div></div>
+        <div class="progress-text" id="nightProgText">0 of 6 activities</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Wind Down</div><div class="stat-value" id="snWD">21:00</div></div>
+        <div class="stat-box"><div class="stat-label">Bedtime</div><div class="stat-value" id="snBed">22:30</div></div>
+        <div class="stat-box"><div class="stat-label">Mood</div><div class="stat-value" id="snMood">Relaxed</div></div>
+        <div class="stat-box"><div class="stat-label">Progress</div><div class="stat-value" id="snProg">0%</div></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="saveNight()">💾 Save Evening</button>
+        <button class="btn btn-outline" onclick="resetNight()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between"><span>📖 Evening History</span><span class="count-badge" id="nightCount">0</span></div>
+      <div id="nightHistory"><p style="color:var(--text3);font-size:.88rem">No entries yet.</p></div>
+    </div>
+  </div>
+
+  <!-- CHECK-IN -->
+  <div id="checkin-section" class="section">
+    <div class="card accent-pink">
+      <div class="card-title"><div class="qs-icon pink" style="font-size:14px">📋</div> Daily Check-in</div>
+      <p class="card-desc">Tune into how you're feeling right now. Awareness is the first step.</p>
+      <div class="form-group">
+        <label>Current Mood</label>
+        <div class="mood-grid">
+          <button class="mood-btn active" onclick="pickMood(this,'checkMood','great')"><span class="mood-emoji">😄</span><span>Great</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'checkMood','good')"><span class="mood-emoji">😊</span><span>Good</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'checkMood','neutral')"><span class="mood-emoji">😐</span><span>Neutral</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'checkMood','stressed')"><span class="mood-emoji">😰</span><span>Stressed</span></button>
+          <button class="mood-btn" onclick="pickMood(this,'checkMood','overwhelmed')"><span class="mood-emoji">😵</span><span>Overwhelmed</span></button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label>Stress Level</label>
+        <div class="slider-wrap">
+          <input type="range" id="stressSlider" min="1" max="10" value="5" oninput="updateSlider('stress')">
+          <div class="slider-cur" id="stressOut">5 / 10</div>
+          <div class="slider-labels"><span>Low</span><span>High</span></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Energy Level</label>
+        <div class="slider-wrap">
+          <input type="range" id="energySlider" min="1" max="10" value="5" oninput="updateSlider('energy')">
+          <div class="slider-cur" id="energyOut">5 / 10</div>
+          <div class="slider-labels"><span>Low</span><span>High</span></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Productivity</label>
+        <div class="slider-wrap">
+          <input type="range" id="productSlider" min="1" max="10" value="5" oninput="updateSlider('product')">
+          <div class="slider-cur" id="productOut">5 / 10</div>
+          <div class="slider-labels"><span>Low</span><span>High</span></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>💧 Water Intake (glasses)</label>
+        <div class="water-cups" id="waterCups"></div>
+        <div style="margin-top:8px;font-size:.8rem;color:var(--text3)">Tap to fill <span id="waterCount" style="color:var(--accent2);font-weight:700">0</span> / 8 glasses</div>
+      </div>
+      <div class="form-group">
+        <label>Daily Reflection</label>
+        <textarea id="ciReflect" placeholder="What's on your mind? Any wins or challenges today?"></textarea>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Mood</div><div class="stat-value" id="cisMood">Great</div></div>
+        <div class="stat-box"><div class="stat-label">Stress</div><div class="stat-value" id="cisStress">5/10</div></div>
+        <div class="stat-box"><div class="stat-label">Energy</div><div class="stat-value" id="cisEnergy">5/10</div></div>
+        <div class="stat-box"><div class="stat-label">Productivity</div><div class="stat-value" id="cisProd">5/10</div></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="saveCheckIn()">💾 Save Check-in</button>
+        <button class="btn btn-outline" onclick="resetCheckIn()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 Today's Goals</div>
+      <div id="goalList"></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <input type="text" id="goalInput" placeholder="Add a goal for today..." style="flex:1" onkeydown="if(event.key==='Enter')addGoal()">
+        <button class="btn btn-primary" onclick="addGoal()" style="flex:0;min-width:auto;padding:11px 16px">+ Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between"><span>📖 Today's Check-ins</span><span class="count-badge" id="ciCount">0</span></div>
+      <div id="ciHistory"><p style="color:var(--text3);font-size:.88rem">No check-ins yet today.</p></div>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div id="tools-section" class="section">
+    <div class="card accent-teal">
+      <div class="card-title">💨 4-7-8 Breathing Exercise</div>
+      <p class="card-desc">Calm your nervous system with this science-backed breathing technique.</p>
+      <div class="breathe-wrap">
+        <div class="breathe-circle" id="breatheCircle" onclick="startBreathe()">
+          <div class="breathe-ring" id="breatheRing"></div>
+          <span id="breatheLabel">Tap to start</span>
+        </div>
+        <div class="breathe-phase" id="breathePhase">Ready when you are</div>
+        <div class="breathe-count" id="breatheCount" style="opacity:0">4</div>
+        <div class="breathe-controls">
+          <button class="btn btn-outline" onclick="stopBreathe()" style="min-width:auto;padding:9px 18px">Stop</button>
+          <select id="breatheCycles" style="width:auto;padding:9px 14px">
+            <option value="3">3 cycles</option>
+            <option value="4" selected>4 cycles</option>
+            <option value="6">6 cycles</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-title">⏱️ Focus Timer (Pomodoro)</div>
+      <p class="card-desc">Boost deep work with structured focus intervals. One session at a time.</p>
+      <div class="pomo-wrap">
+        <div class="pomo-mode-btns">
+          <button class="pomo-mode active" onclick="setPomoMode(25,'focus',this)">Focus 25m</button>
+          <button class="pomo-mode" onclick="setPomoMode(5,'short',this)">Short Break 5m</button>
+          <button class="pomo-mode" onclick="setPomoMode(15,'long',this)">Long Break 15m</button>
+        </div>
+        <div class="pomo-ring">
+          <svg class="pomo-svg" viewBox="0 0 160 160" width="160" height="160">
+            <circle class="pomo-track" cx="80" cy="80" r="68"/>
+            <circle class="pomo-prog" id="pomoCircle" cx="80" cy="80" r="68" stroke="url(#pomoGrad)" stroke-dasharray="427" stroke-dashoffset="0"/>
+            <defs><linearGradient id="pomoGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#00d4aa"/></linearGradient></defs>
+          </svg>
+          <div class="pomo-time" id="pomoDisplay">25:00</div>
+        </div>
+        <div class="pomo-label" id="pomoStatus">Ready to focus</div>
+        <div class="btn-group" style="margin-top:0;justify-content:center">
+          <button class="btn btn-primary" onclick="togglePomo()" id="pomoBtn" style="min-width:120px">▶ Start</button>
+          <button class="btn btn-outline" onclick="resetPomo()" style="min-width:80px;flex:0">↺</button>
+        </div>
+        <div style="font-size:.8rem;color:var(--text3)">Sessions today: <span id="pomoSessions" style="color:var(--accent);font-weight:700">0</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">✨ Daily Affirmation & Tip</div>
+      <div style="background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.2);border-radius:var(--r);padding:20px;margin-bottom:14px">
+        <p id="affirmText" style="font-size:1rem;line-height:1.7;color:var(--text);font-style:italic;margin-bottom:12px">"Loading..."</p>
+        <p id="tipText" style="font-size:.85rem;color:var(--text2);line-height:1.6"></p>
+      </div>
+      <button class="btn btn-outline" onclick="newAffirm()" style="width:auto;min-width:auto;padding:10px 20px">🔄 New Affirmation</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📔 Mood Journal</div>
+      <p class="card-desc">Free-write your thoughts. Journaling reduces stress and builds self-awareness.</p>
+      <textarea id="journalText" placeholder="Write freely here — no rules, no judgment..." style="min-height:140px"></textarea>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+        <select id="journalMoodTag" style="flex:1">
+          <option value="neutral">😐 Neutral</option>
+          <option value="positive">😊 Positive</option>
+          <option value="challenging">😰 Challenging</option>
+          <option value="reflective">🤔 Reflective</option>
+        </select>
+        <button class="btn btn-primary" onclick="saveJournal()" style="flex:0;min-width:auto;padding:11px 18px">Save Entry</button>
+      </div>
+      <div id="journalHistory" style="margin-top:16px"></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard-section" class="section">
+    <div class="card accent-purple">
+      <div class="card-title">⚠️ Burnout Risk Assessment</div>
+      <div style="display:flex;align-items:center;gap:16px;margin:16px 0">
+        <div id="riskBadgeWrap"></div>
+        <div style="flex:1">
+          <div class="risk-meter">
+            <div class="risk-track"><div class="risk-fill" id="riskFill" style="width:0%;background:var(--green)"></div></div>
+            <div class="risk-labels"><span>Low Risk</span><span>High Risk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Stress</div><div class="stat-value" id="rStress">—</div></div>
+        <div class="stat-box"><div class="stat-label">Sleep</div><div class="stat-value" id="rSleep">—</div></div>
+        <div class="stat-box"><div class="stat-label">Energy</div><div class="stat-value" id="rEnergy">—</div></div>
+        <div class="stat-box"><div class="stat-label">Overall</div><div class="stat-value" id="rOverall">—</div></div>
+      </div>
+      <div id="riskRecs" style="background:rgba(6,214,160,.07);border:1px solid rgba(6,214,160,.2);border-radius:var(--r);padding:16px;margin-top:16px">
+        <div style="font-weight:700;color:var(--green);margin-bottom:10px;font-size:.9rem">✅ Recommendations</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px" id="recList"></ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Today's Metrics</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Sleep</div><div class="stat-value" id="dSleep">—</div></div>
+        <div class="stat-box"><div class="stat-label">Quality</div><div class="stat-value" id="dQuality">—</div></div>
+        <div class="stat-box"><div class="stat-label">Stress</div><div class="stat-value" id="dStress">—</div></div>
+        <div class="stat-box"><div class="stat-label">Energy</div><div class="stat-value" id="dEnergy">—</div></div>
+        <div class="stat-box"><div class="stat-label">Productivity</div><div class="stat-value" id="dProd">—</div></div>
+        <div class="stat-box"><div class="stat-label">Mood</div><div class="stat-value" id="dMood">—</div></div>
+        <div class="stat-box"><div class="stat-label">Water</div><div class="stat-value" id="dWater">—</div></div>
+        <div class="stat-box"><div class="stat-label">Focus Sessions</div><div class="stat-value" id="dPomo">—</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 7-Day Stress Overview</div>
+      <p class="card-desc" style="margin-bottom:10px">Your stress trend over the last 7 days.</p>
+      <div class="chart-bar-wrap" id="weekChart"></div>
+      <div style="display:flex;gap:16px;margin-top:4px;font-size:.72rem;color:var(--text3);flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--green);border-radius:2px;display:inline-block"></span>Low (1-3)</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--yellow);border-radius:2px;display:inline-block"></span>Moderate (4-6)</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--red);border-radius:2px;display:inline-block"></span>High (7-10)</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔥 Streaks & Totals</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Morning Entries</div><div class="stat-value" id="totalMorn">0</div></div>
+        <div class="stat-box"><div class="stat-label">Evening Entries</div><div class="stat-value" id="totalNight">0</div></div>
+        <div class="stat-box"><div class="stat-label">Check-ins</div><div class="stat-value" id="totalCI">0</div></div>
+        <div class="stat-box"><div class="stat-label">Avg Sleep</div><div class="stat-value" id="avgSleep">—</div></div>
+        <div class="stat-box"><div class="stat-label">Avg Stress</div><div class="stat-value" id="avgStress">—</div></div>
+        <div class="stat-box"><div class="stat-label">Journal Entries</div><div class="stat-value" id="totalJournal">0</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚙️ Data Management</div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="exportJSON()">📥 Export JSON</button>
+        <button class="btn btn-primary" onclick="exportCSV()">📊 Export CSV</button>
+        <button class="btn btn-outline" onclick="clearData()">🗑️ Clear All Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PREMIUM SECTION ========== -->
+  <div id="premium-section" class="section">
+
+    <!-- Header -->
+    <div class="premium-header">
+      <div class="premium-badge">⭐ Premium Insights</div>
+      <div class="premium-title">⭐ Your Personalised Wellness Intelligence</div>
+      <p class="premium-sub">Deep trend analysis, pattern detection, and personalised recommendations built from your actual logged data — not generic advice.</p>
+    </div>
+
+    <!-- Trend Metrics -->
+    <div class="card accent-gold">
+      <div class="card-title">📊 7-Day Trend Analysis</div>
+      <p class="card-desc">How each metric is moving compared to your previous week.</p>
+      <div class="trend-grid" id="trendGrid">
+        <p style="color:var(--text3);font-size:.88rem">Log at least 3 check-ins to unlock trend analysis.</p>
+      </div>
+    </div>
+
+    <!-- Pattern Detection -->
+    <div class="card accent-gold">
+      <div class="card-title">🔍 Detected Patterns</div>
+      <p class="card-desc">Recurring behaviours and warning signals spotted in your data.</p>
+      <div id="patternAlerts">
+        <p style="color:var(--text3);font-size:.88rem">Patterns will appear as you log more data over multiple days.</p>
+      </div>
+    </div>
+
+    <!-- Personalised Recommendations -->
+    <div class="card accent-gold">
+      <div class="card-title">🎯 Personalised Recommendations</div>
+      <p class="card-desc">Tailored actions ranked by impact on your specific wellness profile.</p>
+      <div id="personalRecs">
+        <p style="color:var(--text3);font-size:.88rem">Save a morning routine and at least one check-in to receive personalised recommendations.</p>
+      </div>
+    </div>
+
+    <!-- Habit Streak Calendar -->
+    <div class="card accent-gold">
+      <div class="card-title">📅 30-Day Habit Calendar</div>
+      <p class="card-desc">Days you completed your morning routine — consistency is everything.</p>
+      <div class="cal-header">
+        <div class="cal-header-day">Sun</div><div class="cal-header-day">Mon</div><div class="cal-header-day">Tue</div>
+        <div class="cal-header-day">Wed</div><div class="cal-header-day">Thu</div><div class="cal-header-day">Fri</div><div class="cal-header-day">Sat</div>
+      </div>
+      <div class="cal-grid" id="habitCal"></div>
+      <div style="display:flex;gap:16px;margin-top:12px;font-size:.72rem;color:var(--text3);flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:rgba(108,99,255,.35);border-radius:3px;display:inline-block;border:1px solid rgba(108,99,255,.5)"></span>Logged</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:rgba(255,255,255,.04);border-radius:3px;display:inline-block;border:1px solid var(--border)"></span>No log</span>
+      </div>
+    </div>
+
+    <!-- Weekly Report -->
+    <div class="card accent-gold">
+      <div class="report-header">
+        <div class="card-title" style="margin-bottom:0">📋 Weekly Wellness Report</div>
+        <div class="report-week-badge" id="reportWeekLabel">Current Week</div>
+      </div>
+      <p class="card-desc">A full summary of this week's performance, patterns, and growth areas.</p>
+
+      <!-- Score -->
+      <div class="report-score">
+        <div class="report-score-val" id="reportScore" style="color:var(--accent)">—</div>
+        <div class="report-score-label">Weekly Wellness Score</div>
+        <div class="report-score-grade" id="reportGrade" style="color:var(--text2)">Log data to generate your score</div>
+      </div>
+
+      <!-- Metric breakdown -->
+      <div class="report-metrics" id="reportMetrics"></div>
+
+      <!-- Key insights -->
+      <div style="margin-top:16px">
+        <div style="font-size:.82rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Key Insights This Week</div>
+        <div id="reportInsights"><p style="color:var(--text3);font-size:.85rem">No insights yet — keep logging throughout the week.</p></div>
+      </div>
+
+      <div class="btn-group" style="margin-top:20px">
+        <button class="btn btn-gold" onclick="downloadWeeklyReport()">📥 Download Full Report</button>
+        <button class="btn btn-outline" onclick="renderPremium()">🔄 Refresh</button>
+      </div>
+    </div>
+
+  </div><!-- end premium -->
+</div>
+
+<!-- WhatsApp Widget -->
+<div class="wa-widget">
+  <div class="wa-tooltip">
+    <strong>💬 Wellness Chatbot</strong>
+    Chat with us on WhatsApp
+  </div>
+  <a class="wa-btn" href="https://wa.me/919960594908?text=Hi!%20I%20need%20help%20with%20my%20Burnout%20Wellness%20Dashboard%20%F0%9F%8C%BF" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+    <div class="wa-pulse"></div>
+    <div class="wa-pulse2"></div>
+    <div class="wa-badge">1</div>
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+</div>
+
+<script>
+// ====== PARTICLES ======
+(function(){const c=document.getElementById('particles');for(let i=0;i<18;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*14)+'s';p.style.animationDelay=(Math.random()*12)+'s';p.style.opacity=Math.random()*.3;p.style.width=p.style.height=(1+Math.random()*2)+'px';c.appendChild(p);}})();
+
+// ====== STATE ======
+const state={morningMood:'energetic',eveningMood:'relaxed',checkMood:'great',waterGlasses:0,pomoSecs:1500,pomoRunning:false,pomoCycles:0,pomoMode:'focus',breatheRunning:false};
+let pomoInterval=null,breatheInterval=null;
+
+// ====== DATE ======
+function updateDate(){const n=new Date();document.getElementById('dateTime').textContent=n.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+updateDate();setInterval(updateDate,60000);
+
+// ====== TOAST ======
+let toastTimer;
+function toast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);}
+
+// ====== TABS ======
+function switchTab(tab,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tab+'-section').classList.add('active');
+  btn.classList.add('active');
+  if(tab==='dashboard')updateDashboard();
+  if(tab==='premium')renderPremium();
+}
+
+// ====== MOOD ======
+function pickMood(el,key,val){const section=el.closest('.section');if(section)section.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');state[key]=val;const map={morningMood:'smMood',eveningMood:'snMood',checkMood:'cisMood'};if(map[key]){const e=document.getElementById(map[key]);if(e)e.textContent=cap(val);}}
+
+// ====== CHECKS ======
+function toggleCheck(el,id){el.classList.toggle('checked');const inp=document.getElementById(id);if(inp)inp.checked=el.classList.contains('checked');updateProgress();}
+function updateProgress(){['morn','night'].forEach(prefix=>{const items=prefix==='morn'?document.querySelectorAll('#morningChecks .check-item'):document.querySelectorAll('#nightChecks .check-item');const total=items.length,done=[...items].filter(i=>i.classList.contains('checked')).length;const pct=Math.round(done/total*100);const bar=document.getElementById(prefix+'Prog');const txt=document.getElementById(prefix+'ProgText');const stat=document.getElementById(prefix==='morn'?'smProg':'snProg');if(bar)bar.style.width=pct+'%';if(txt)txt.textContent=done+' of '+total+' activities';if(stat)stat.textContent=pct+'%';});}
+
+// ====== SLIDER ======
+function updateSlider(key){const map={stress:['stressSlider','stressOut','cisStress'],energy:['energySlider','energyOut','cisEnergy'],product:['productSlider','productOut','cisProd']};const[sid,oid,cid]=map[key];const v=document.getElementById(sid).value;document.getElementById(oid).textContent=v+' / 10';document.getElementById(cid).textContent=v+'/10';}
+
+// ====== WATER ======
+(function initWater(){const c=document.getElementById('waterCups');for(let i=0;i<8;i++){const cup=document.createElement('div');cup.className='water-cup';cup.innerHTML='<div class="water-fill" style="height:0%"></div>';cup.dataset.i=i;cup.onclick=()=>fillWater(i);c.appendChild(cup);}})();
+function fillWater(idx){const cups=[...document.querySelectorAll('.water-cup')];const cur=cups.filter(c=>c.classList.contains('filled')).length;const newFill=cur===idx+1?idx:idx+1;cups.forEach((c,i)=>{const filled=i<newFill;c.classList.toggle('filled',filled);c.querySelector('.water-fill').style.height=filled?'80%':'0%';});state.waterGlasses=newFill;document.getElementById('waterCount').textContent=newFill;document.getElementById('qsWater').textContent=newFill+'/8';}
+
+// ====== MORNING ======
+function updateMornStats(){const h=document.getElementById('sleepHours').value||'0';const m=document.getElementById('sleepMinutes').value||'0';document.getElementById('smSleep').textContent=h+'h '+m+'m';document.getElementById('qsSleep').textContent=h+'h';const q=document.getElementById('sleepQuality').value;document.getElementById('smQuality').textContent=q?cap(q):'—';}
+function saveMorning(){const data={sleepHours:document.getElementById('sleepHours').value,sleepMinutes:document.getElementById('sleepMinutes').value,sleepQuality:document.getElementById('sleepQuality').value,mood:state.morningMood,activities:getMornActivities(),timestamp:new Date().toLocaleString(),date:new Date().toLocaleDateString()};const arr=getStore('morningRoutines');arr.push(data);setStore('morningRoutines',arr);setStore('morningData',data);toast('✅ Morning routine saved!');loadMornHistory();updateQuick();confetti();}
+function getMornActivities(){const ids=['morn_med','morn_ex','morn_bf','morn_h2o','morn_jour','morn_plan','morn_sun','morn_cold'];const obj={};ids.forEach(id=>{obj[id]=document.querySelector('#morningChecks .check-item[onclick*="'+id+'"]')?.classList.contains('checked')||false});return obj;}
+function resetMorning(){document.getElementById('sleepHours').value='7';document.getElementById('sleepMinutes').value='30';document.getElementById('sleepQuality').value='';document.querySelectorAll('#morningChecks .check-item').forEach(i=>i.classList.remove('checked'));document.querySelectorAll('#morning-section .mood-btn')[0].click();updateProgress();toast('↺ Reset','info');}
+function loadMornHistory(){const arr=getStore('morningRoutines');document.getElementById('mornCount').textContent=arr.length;if(!arr.length){document.getElementById('mornHistory').innerHTML='<p style="color:var(--text3);font-size:.88rem">No entries yet.</p>';return;}document.getElementById('mornHistory').innerHTML=arr.slice(-5).reverse().map(e=>`<div class="hist-item"><div class="hist-date">${e.timestamp}</div><div class="hist-details"><span class="hist-tag">Sleep: ${e.sleepHours}h ${e.sleepMinutes}m</span><span class="hist-tag">Quality: ${e.sleepQuality||'—'}</span><span class="hist-tag">Mood: ${e.mood}</span><span class="hist-tag">Activities: ${Object.values(e.activities||{}).filter(Boolean).length}</span></div></div>`).join('');}
+
+// ====== EVENING ======
+function saveNight(){const data={windDown:document.getElementById('windDown').value,bedTime:document.getElementById('bedTime').value,mood:state.eveningMood,activities:getNightActivities(),timestamp:new Date().toLocaleString(),date:new Date().toLocaleDateString()};const arr=getStore('nightRoutines');arr.push(data);setStore('nightRoutines',arr);setStore('nightData',data);toast('✅ Evening routine saved!');loadNightHistory();confetti();}
+function getNightActivities(){const ids=['n_screen','n_yoga','n_read','n_tea','n_breath','n_grat'];const obj={};ids.forEach(id=>{obj[id]=document.querySelector('#nightChecks .check-item[onclick*="'+id+'"]')?.classList.contains('checked')||false});return obj;}
+function resetNight(){document.getElementById('windDown').value='21:00';document.getElementById('bedTime').value='22:30';document.querySelectorAll('#nightChecks .check-item').forEach(i=>i.classList.remove('checked'));document.querySelectorAll('#night-section .mood-btn')[0].click();updateProgress();toast('↺ Reset','info');}
+function loadNightHistory(){const arr=getStore('nightRoutines');document.getElementById('nightCount').textContent=arr.length;if(!arr.length){document.getElementById('nightHistory').innerHTML='<p style="color:var(--text3);font-size:.88rem">No entries yet.</p>';return;}document.getElementById('nightHistory').innerHTML=arr.slice(-5).reverse().map(e=>`<div class="hist-item" style="border-left-color:var(--accent2)"><div class="hist-date" style="color:var(--accent2)">${e.timestamp}</div><div class="hist-details"><span class="hist-tag">Wind Down: ${e.windDown}</span><span class="hist-tag">Bed: ${e.bedTime}</span><span class="hist-tag">Mood: ${e.mood}</span></div></div>`).join('');}
+
+// ====== CHECK-IN ======
+function saveCheckIn(){const data={mood:state.checkMood,stress:document.getElementById('stressSlider').value,energy:document.getElementById('energySlider').value,productivity:document.getElementById('productSlider').value,water:state.waterGlasses,reflection:document.getElementById('ciReflect').value,timestamp:new Date().toLocaleString(),time:new Date().toLocaleString(),date:new Date().toLocaleDateString()};const arr=getStore('morningRoutines');arr.push(data);setStore('morningRoutines',arr);setStore('morningData',data);toast('✅ Morning routine saved!');loadMornHistory();updateQuick();confetti();}
+function getMornActivities(){const ids=['morn_med','morn_ex','morn_bf','morn_h2o','morn_jour','morn_plan','morn_sun','morn_cold'];const obj={};ids.forEach(id=>{obj[id]=document.querySelector('#morningChecks .check-item[onclick*="'+id+'"]')?.classList.contains('checked')||false});return obj;}
+function resetMorning(){document.getElementById('sleepHours').value='7';document.getElementById('sleepMinutes').value='30';document.getElementById('sleepQuality').value='';document.querySelectorAll('#morningChecks .check-item').forEach(i=>i.classList.remove('checked'));document.querySelectorAll('#morning-section .mood-btn')[0].click();updateProgress();toast('↺ Reset','info');}
+function loadMornHistory(){const arr=getStore('morningRoutines');document.getElementById('mornCount').textContent=arr.length;if(!arr.length){document.getElementById('mornHistory').innerHTML='<p style="color:var(--text3);font-size:.88rem">No entries yet.</p>';return;}document.getElementById('mornHistory').innerHTML=arr.slice(-5).reverse().map(e=>`<div class="hist-item"><div class="hist-date">${e.timestamp}</div><div class="hist-details"><span class="hist-tag">Sleep: ${e.sleepHours}h ${e.sleepMinutes}m</span><span class="hist-tag">Quality: ${e.sleepQuality||'—'}</span><span class="hist-tag">Mood: ${e.mood}</span><span class="hist-tag">Activities: ${Object.values(e.activities||{}).filter(Boolean).length}</span></div></div>`).join('');}
+
+// ====== EVENING ======
+function saveNight(){const data={windDown:document.getElementById('windDown').value,bedTime:document.getElementById('bedTime').value,mood:state.eveningMood,activities:getNightActivities(),timestamp:new Date().toLocaleString(),date:new Date().toLocaleDateString()};const arr=getStore('nightRoutines');arr.push(data);setStore('nightRoutines',arr);setStore('nightData',data);toast('✅ Evening routine saved!');loadNightHistory();confetti();}
+function getNightActivities(){const ids=['n_screen','n_yoga','n_read','n_tea','n_breath','n_grat'];const obj={};ids.forEach(id=>{obj[id]=document.querySelector('#nightChecks .check-item[onclick*="'+id+'"]')?.classList.contains('checked')||false});return obj;}
+function resetNight(){document.getElementById('windDown').value='21:00';document.getElementById('bedTime').value='22:30';document.querySelectorAll('#nightChecks .check-item').forEach(i=>i.classList.remove('checked'));document.querySelectorAll('#night-section .mood-btn')[0].click();updateProgress();toast('↺ Reset','info');}
+function loadNightHistory(){const arr=getStore('nightRoutines');document.getElementById('nightCount').textContent=arr.length;if(!arr.length){document.getElementById('nightHistory').innerHTML='<p style="color:var(--text3);font-size:.88rem">No entries yet.</p>';return;}document.getElementById('nightHistory').innerHTML=arr.slice(-5).reverse().map(e=>`<div class="hist-item" style="border-left-color:var(--accent2)"><div class="hist-date" style="color:var(--accent2)">${e.timestamp}</div><div class="hist-details"><span class="hist-tag">Wind Down: ${e.windDown}</span><span class="hist-tag">Bed: ${e.bedTime}</span><span class="hist-tag">Mood: ${e.mood}</span></div></div>`).join('');}
+
+// ====== CHECK-IN ======
+function saveCheckIn(){const data={mood:state.checkMood,stress:document.getElementById('stressSlider').value,energy:document.getElementById('energySlider').value,productivity:document.getElementById('productSlider').value,water:state.waterGlasses,reflection:document.getElementById('ciReflect').value,timestamp:new Date().toLocaleString(),time:new Date().toLocaleTimeString(),date:new Date().toLocaleDateString()};const arr=getStore('checkIns');arr.push(data);setStore('checkIns',arr);toast('✅ Check-in saved!');loadCIHistory();updateQuick();confetti();}
+function resetCheckIn(){['stressSlider','energySlider','productSlider'].forEach(id=>document.getElementById(id).value=5);['stress','energy','product'].forEach(k=>updateSlider(k));document.getElementById('ciReflect').value='';document.querySelectorAll('#checkin-section .mood-btn')[0].click();toast('↺ Reset','info');}
+function loadCIHistory(){const arr=getStore('checkIns');const today=new Date().toLocaleDateString();const td=arr.filter(c=>c.date===today).reverse();document.getElementById('ciCount').textContent=td.length;if(!td.length){document.getElementById('ciHistory').innerHTML='<p style="color:var(--text3);font-size:.88rem">No check-ins today.</p>';return;}document.getElementById('ciHistory').innerHTML=td.map(e=>`<div class="hist-item" style="border-left-color:var(--accent3)"><div class="hist-date" style="color:var(--accent3)">${e.time}</div><div class="hist-details"><span class="hist-tag">Mood: ${e.mood}</span><span class="hist-tag">Stress: ${e.stress}/10</span><span class="hist-tag">Energy: ${e.energy}/10</span><span class="hist-tag">Water: ${e.water||0}/8</span></div>${e.reflection?'<div style="margin-top:8px;font-size:.78rem;color:var(--text2);font-style:italic">"'+e.reflection.substring(0,80)+(e.reflection.length>80?'...':'')+'"</div>':''}</div>`).join('');}
+
+// ====== GOALS ======
+function addGoal(){const inp=document.getElementById('goalInput');if(!inp.value.trim())return;const arr=getStore('goals');arr.push({text:inp.value.trim(),done:false,date:new Date().toLocaleDateString()});setStore('goals',arr);inp.value='';renderGoals();}
+function toggleGoal(i){const arr=getStore('goals');arr[i].done=!arr[i].done;setStore('goals',arr);renderGoals();}
+function renderGoals(){const arr=getStore('goals');const today=new Date().toLocaleDateString();const td=arr.map((g,i)=>({...g,i})).filter(g=>g.date===today);if(!td.length){document.getElementById('goalList').innerHTML='<p style="color:var(--text3);font-size:.85rem;padding:8px 0">No goals yet. Add one above!</p>';return;}document.getElementById('goalList').innerHTML=td.map(g=>`<div class="goal-item"><div class="goal-check ${g.done?'done':''}" onclick="toggleGoal(${g.i})">${g.done?'✓':''}</div><span class="goal-text ${g.done?'done':''}">${g.text}</span></div>`).join('');}
+
+// ====== BREATHING ======
+let breathePhase=0,breatheMax=4,breatheTotalCycles=0;
+const breatheSeq=[{label:'Inhale',dur:4},{label:'Hold',dur:7},{label:'Exhale',dur:8}];
+function startBreathe(){if(state.breatheRunning)return;state.breatheRunning=true;breathePhase=0;breatheMax=parseInt(document.getElementById('breatheCycles').value);breatheTotalCycles=0;document.getElementById('breatheCircle').classList.add('breathing');runBreathePhase();}
+function runBreathePhase(){if(!state.breatheRunning)return;const phase=breatheSeq[breathePhase];document.getElementById('breathePhase').textContent=phase.label;document.getElementById('breatheLabel').textContent=phase.label;document.getElementById('breatheCount').style.opacity='1';let secs=phase.dur;document.getElementById('breatheCount').textContent=secs;breatheInterval=setInterval(()=>{secs--;document.getElementById('breatheCount').textContent=secs;if(secs<=0){clearInterval(breatheInterval);breathePhase=(breathePhase+1)%3;if(breathePhase===0){breatheTotalCycles++;if(breatheTotalCycles>=breatheMax){stopBreathe();toast('🌬️ Breathing complete! Well done.');return;}}runBreathePhase();}},1000);}
+function stopBreathe(){state.breatheRunning=false;clearInterval(breatheInterval);document.getElementById('breatheCircle').classList.remove('breathing');document.getElementById('breathePhase').textContent='Ready when you are';document.getElementById('breatheLabel').textContent='Tap to start';document.getElementById('breatheCount').style.opacity='0';}
+
+// ====== POMODORO ======
+function setPomoMode(mins,mode,btn){state.pomoMode=mode;resetPomo();state.pomoSecs=mins*60;updatePomoDisplay();document.querySelectorAll('.pomo-mode').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function togglePomo(){if(state.pomoRunning){clearInterval(pomoInterval);state.pomoRunning=false;document.getElementById('pomoBtn').textContent='▶ Resume';document.getElementById('pomoStatus').textContent='Paused';}else{state.pomoRunning=true;document.getElementById('pomoBtn').textContent='⏸ Pause';document.getElementById('pomoStatus').textContent=state.pomoMode==='focus'?'Deep focus mode':'Break time';pomoInterval=setInterval(()=>{state.pomoSecs--;updatePomoDisplay();if(state.pomoSecs<=0){clearInterval(pomoInterval);state.pomoRunning=false;if(state.pomoMode==='focus'){state.pomoCycles++;setStore('pomoSessions',(getStore('pomoSessions')||0)+1);document.getElementById('pomoSessions').textContent=getStore('pomoSessions')||0;toast('🎉 Focus session complete!','success');confetti();}else{toast('☕ Break done. Ready to focus?','info');}document.getElementById('pomoBtn').textContent='▶ Start';document.getElementById('pomoStatus').textContent='Session complete!';}},1000);}}
+function resetPomo(){clearInterval(pomoInterval);state.pomoRunning=false;const mins={focus:25,short:5,long:15};state.pomoSecs=mins[state.pomoMode]*60;updatePomoDisplay();document.getElementById('pomoBtn').textContent='▶ Start';document.getElementById('pomoStatus').textContent='Ready to focus';}
+function updatePomoDisplay(){const m=Math.floor(state.pomoSecs/60),s=state.pomoSecs%60;document.getElementById('pomoDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');const total={focus:1500,short:300,long:900}[state.pomoMode];const frac=(total-state.pomoSecs)/total;const circ=427;document.getElementById('pomoCircle').style.strokeDashoffset=circ*(1-frac);document.getElementById('pomoSessions').textContent=getStore('pomoSessions')||0;}
+
+// ====== AFFIRMATIONS ======
+const affirmations=[{a:"You are more resilient than you realize. Every challenge has made you stronger.",t:"💡 Taking 5-minute breaks every hour boosts focus by up to 30%."},{a:"Rest is not a reward — it is a requirement. You deserve to recharge.",t:"💡 Consistent sleep schedules improve mood and cognitive function."},{a:"Progress, not perfection. Every small step forward counts.",t:"💡 Deep breathing activates your parasympathetic nervous system instantly."},{a:"Your worth is not measured by your productivity today.",t:"💡 Hydration directly affects energy levels and concentration."},{a:"It's okay to say no. Boundaries protect your energy and wellbeing.",t:"💡 A 10-minute walk can elevate mood for up to 2 hours."},{a:"You have survived every difficult day so far. That's a 100% success rate.",t:"💡 Gratitude journaling rewires the brain toward positive patterns over time."},{a:"Asking for help is a sign of self-awareness, not weakness.",t:"💡 Screen-free wind-down time significantly improves sleep onset."},{a:"Your feelings are valid. Acknowledging them is the first step to processing them.",t:"💡 Social connection is one of the most powerful antidotes to burnout."}];
+function newAffirm(){const r=affirmations[Math.floor(Math.random()*affirmations.length)];document.getElementById('affirmText').textContent='"'+r.a+'"';document.getElementById('tipText').textContent=r.t;}
+newAffirm();
+
+// ====== JOURNAL ======
+function saveJournal(){const text=document.getElementById('journalText').value.trim();if(!text)return;const arr=getStore('journalEntries');arr.push({text,mood:document.getElementById('journalMoodTag').value,timestamp:new Date().toLocaleString(),date:new Date().toLocaleDateString()});setStore('journalEntries',arr);document.getElementById('journalText').value='';toast('📔 Journal entry saved!');renderJournal();}
+function renderJournal(){const arr=getStore('journalEntries');if(!arr.length){document.getElementById('journalHistory').innerHTML='';return;}document.getElementById('journalHistory').innerHTML='<div style="font-size:.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Recent Entries</div>'+arr.slice(-3).reverse().map(e=>`<div class="hist-item" style="border-left-color:var(--yellow)"><div class="hist-date" style="color:var(--yellow)">${e.timestamp} · ${cap(e.mood)}</div><div style="font-size:.83rem;color:var(--text2);margin-top:4px;line-height:1.5">${e.text.substring(0,120)}${e.text.length>120?'...':''}</div></div>`).join('');}
+
+// ====== DASHBOARD ======
+function updateDashboard(){const mData=getStore('morningData');const checkIns=getStore('checkIns');const mArr=getStore('morningRoutines');const nArr=getStore('nightRoutines');const jArr=getStore('journalEntries');if(mData){document.getElementById('dSleep').textContent=mData.sleepHours+'h '+mData.sleepMinutes+'m';document.getElementById('dQuality').textContent=mData.sleepQuality?cap(mData.sleepQuality):'—';}const last=checkIns.length?checkIns[checkIns.length-1]:null;if(last){document.getElementById('dStress').textContent=last.stress+'/10';document.getElementById('dEnergy').textContent=last.energy+'/10';document.getElementById('dProd').textContent=last.productivity+'/10';document.getElementById('dMood').textContent=cap(last.mood);document.getElementById('dWater').textContent=(last.water||0)+'/8';}document.getElementById('dPomo').textContent=getStore('pomoSessions')||0;document.getElementById('totalMorn').textContent=mArr.length;document.getElementById('totalNight').textContent=nArr.length;document.getElementById('totalCI').textContent=checkIns.length;document.getElementById('totalJournal').textContent=jArr.length;if(mArr.length){const avg=mArr.reduce((a,r)=>a+parseFloat(r.sleepHours||0),0)/mArr.length;document.getElementById('avgSleep').textContent=avg.toFixed(1)+'h';}if(checkIns.length){const avg=checkIns.reduce((a,c)=>a+parseInt(c.stress||5),0)/checkIns.length;document.getElementById('avgStress').textContent=avg.toFixed(1)+'/10';}calcBurnout(mData,last);buildWeekChart(checkIns);}
+function calcBurnout(mData,last){let score=0,max=0;const recs=[];if(last){const s=parseInt(last.stress);max+=10;score+=s;if(s>=8)recs.push('🧘 Practice daily relaxation — your stress is critically high.');else if(s>=5)recs.push('🌿 Schedule short mindful breaks throughout your day.');const e=parseInt(last.energy);max+=10;score+=(10-e);if(e<=3)recs.push('🛌 Prioritize rest immediately — your energy is depleted.');else if(e<=5)recs.push('⚡ Consider a 20-minute power nap or gentle movement break.');}if(mData){const h=parseFloat(mData.sleepHours)+(parseFloat(mData.sleepMinutes)||0)/60;max+=10;const sleepScore=h<6?8:h<7?5:h<9?2:3;score+=sleepScore;if(h<6)recs.push('😴 Critical: aim for 7–9 hours of sleep. Sleep deprivation accelerates burnout.');else if(h<7)recs.push('😴 Try to get 30 more minutes of sleep for better recovery.');}if(recs.length===0){recs.push('✅ Keep up your excellent self-care routines.');recs.push('🏃 Maintain your exercise and mindfulness habits.');recs.push("🌟 You're doing great — consistency is the key.");}const pct=max>0?Math.round(score/max*100):0;let level='Low',cls='badge-low',color='var(--green)';if(pct>=60){level='High';cls='badge-high';color='var(--red)';}else if(pct>=35){level='Moderate';cls='badge-moderate';color='var(--yellow)';}document.getElementById('riskBadgeWrap').innerHTML='<span class="badge '+cls+'">'+level+' Risk</span>';document.getElementById('riskFill').style.width=pct+'%';document.getElementById('riskFill').style.background=color;document.getElementById('rStress').textContent=last?last.stress+'/10':'—';document.getElementById('rSleep').textContent=mData?mData.sleepHours+'h':'—';document.getElementById('rEnergy').textContent=last?last.energy+'/10':'—';document.getElementById('rOverall').textContent=level;document.getElementById('recList').innerHTML=recs.map(r=>'<li style="font-size:.85rem;color:var(--text2);padding:4px 0;display:flex;gap:8px"><span>→</span><span>'+r+'</span></li>').join('');}
+function buildWeekChart(checkIns){const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const today=new Date();const data=Array(7).fill(null);checkIns.slice(-30).forEach(ci=>{const d=new Date(ci.date);const diff=Math.round((today-d)/86400000);if(diff>=0&&diff<7)data[6-diff]=parseInt(ci.stress)||5;});const maxH=68;const wrap=document.getElementById('weekChart');wrap.innerHTML=data.map((v,i)=>{const d=new Date(today);d.setDate(d.getDate()-(6-i));const day=days[d.getDay()];const h=v?Math.round((v/10)*maxH):4;const color=!v?'rgba(255,255,255,.08)':v<=3?'var(--green)':v<=6?'var(--yellow)':'var(--red)';return`<div class="chart-col"><div class="chart-val">${v||''}</div><div class="chart-bar" style="height:${h}px;background:${color}"></div><div class="chart-day">${day}</div></div>`;}).join('');}
+function updateQuick(){const mData=getStore('morningData');const checkIns=getStore('checkIns');if(mData)document.getElementById('qsSleep').textContent=mData.sleepHours+'h';const last=checkIns.length?checkIns[checkIns.length-1]:null;if(last){document.getElementById('qsEnergy').textContent=last.energy+'/10';document.getElementById('qsStress').textContent=last.stress+'/10';document.getElementById('qsMood').textContent=cap(last.mood);}}
+
+// ====== PREMIUM ENGINE ======
+function getWeekData(daysBack=7){
+  const ci=getStore('checkIns');const today=new Date();
+  return ci.filter(c=>{const d=new Date(c.date);const diff=Math.round((today-d)/86400000);return diff>=0&&diff<daysBack;});
+}
+function getPrevWeekData(){
+  const ci=getStore('checkIns');const today=new Date();
+  return ci.filter(c=>{const d=new Date(c.date);const diff=Math.round((today-d)/86400000);return diff>=7&&diff<14;});
+}
+function avg(arr,key){if(!arr.length)return null;return arr.reduce((s,i)=>s+parseFloat(i[key]||0),0)/arr.length;}
+
+function renderPremium(){
+  const ci=getStore('checkIns');
+  const mArr=getStore('morningRoutines');
+  const thisWeek=getWeekData(7);
+  const prevWeek=getPrevWeekData();
+
+  renderTrends(thisWeek,prevWeek);
+  renderPatterns(ci,mArr);
+  renderPersonalRecs(thisWeek,mArr);
+  renderHabitCal(mArr);
+  renderWeeklyReport(thisWeek,prevWeek,mArr);
+}
+
+function renderTrends(thisWeek,prevWeek){
+  const wrap=document.getElementById('trendGrid');
+  if(thisWeek.length<2){wrap.innerHTML='<p style="color:var(--text3);font-size:.88rem">Log at least 2 check-ins this week to see trends.</p>';return;}
+
+  const metrics=[
+    {key:'stress',label:'Avg Stress',icon:'🌡',invert:true},
+    {key:'energy',label:'Avg Energy',icon:'⚡',invert:false},
+    {key:'productivity',label:'Avg Productivity',icon:'🎯',invert:false},
+    {key:'water',label:'Avg Water',icon:'💧',invert:false,suffix:'/8'},
+  ];
+
+  // Get daily data for sparkline (last 7 days)
+  const today=new Date();
+  const days=Array(7).fill(null).map((_,i)=>{
+    const d=new Date(today);d.setDate(d.getDate()-(6-i));
+    const ds=d.toLocaleDateString();
+    const dayCI=thisWeek.filter(c=>c.date===ds);
+    return dayCI.length?{stress:avg(dayCI,'stress'),energy:avg(dayCI,'energy'),productivity:avg(dayCI,'productivity'),water:avg(dayCI,'water')}:null;
+  });
+
+  wrap.innerHTML=metrics.map(m=>{
+    const curVal=avg(thisWeek,m.key);
+    const prevVal=avg(prevWeek,m.key);
+    if(curVal===null)return'';
+    const diff=prevVal!==null?curVal-prevVal:null;
+    const improving=m.invert?(diff<-0.3):(diff>0.3);
+    const worsening=m.invert?(diff>0.3):(diff<-0.3);
+    const arrowCls=diff===null?'trend-stable':improving?'trend-up':worsening?'trend-down':'trend-stable';
+    const arrowTxt=diff===null?'No prev data':improving?`▲ ${Math.abs(diff).toFixed(1)} vs last week`:worsening?`▼ ${Math.abs(diff).toFixed(1)} vs last week`:`≈ Stable`;
+    const color=m.invert?(curVal<=3?'var(--green)':curVal<=6?'var(--yellow)':'var(--red)'):(curVal>=7?'var(--green)':curVal>=4?'var(--yellow)':'var(--red)');
+    // sparkline
+    const sparkBars=days.map(d=>{
+      const v=d?parseFloat(d[m.key]||0):0;
+      const h=v?Math.round((v/10)*100):8;
+      const bc=!d?'rgba(255,255,255,.06)':m.invert?(v<=3?'var(--green)':v<=6?'var(--yellow)':'var(--red)'):(v>=7?'var(--green)':v>=4?'var(--yellow)':'var(--red)');
+      return`<div class="trend-bar" style="height:${h}%;background:${bc};opacity:${d?.5:0.2}"></div>`;
+    }).join('');
+    return`<div class="trend-card">
+      <div class="trend-metric">${m.icon} ${m.label}</div>
+      <div class="trend-val" style="color:${color}">${curVal.toFixed(1)}${m.suffix||'/10'}</div>
+      <span class="trend-arrow ${arrowCls}">${arrowTxt}</span>
+      <div class="trend-spark">${sparkBars}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPatterns(ci,mArr){
+  const wrap=document.getElementById('patternAlerts');
+  if(ci.length<3){wrap.innerHTML='<p style="color:var(--text3);font-size:.88rem">Log at least 3 check-ins across multiple days to detect patterns.</p>';return;}
+  const alerts=[];
+  const thisWeek=getWeekData(7);
+  // Pattern 1: Consistently high stress
+  const avgStress=avg(thisWeek,'stress');
+  if(avgStress&&avgStress>7)alerts.push({type:'danger',icon:'🔴',title:'Chronically High Stress Detected',desc:`Your average stress this week is ${avgStress.toFixed(1)}/10. Sustained high stress is a primary burnout driver. Consider adding a daily decompression routine — even 10 minutes helps.`});
+  else if(avgStress&&avgStress>5)alerts.push({type:'warn',icon:'🟡',title:'Elevated Stress Trend',desc:`Stress averaging ${avgStress.toFixed(1)}/10 this week. Watch for escalation — try scheduling one tech-free hour daily.`});
+  // Pattern 2: Low energy
+  const avgEnergy=avg(thisWeek,'energy');
+  if(avgEnergy&&avgEnergy<4)alerts.push({type:'danger',icon:'⚡',title:'Energy Depletion Pattern',desc:`Your energy has averaged just ${avgEnergy.toFixed(1)}/10 this week. This is a critical early burnout signal. Prioritise sleep, movement, and nutrition immediately.`});
+  // Pattern 3: Sleep consistency
+  const recentSleep=mArr.slice(-5);
+  if(recentSleep.length>=3){const sleepVals=recentSleep.map(r=>parseFloat(r.sleepHours||0));const minSleep=Math.min(...sleepVals);if(minSleep<6)alerts.push({type:'danger',icon:'😴',title:'Sleep Deprivation Detected',desc:`At least one recent night had under 6 hours of sleep (lowest: ${minSleep}h). Even a single night of poor sleep impairs decision-making and emotional regulation for days.`});}
+  // Pattern 4: Good streak
+  const loggedDates=new Set(mArr.map(r=>r.date));
+  const today=new Date();let streak=0;
+  for(let i=0;i<7;i++){const d=new Date(today);d.setDate(d.getDate()-i);if(loggedDates.has(d.toLocaleDateString()))streak++;else break;}
+  if(streak>=3)alerts.push({type:'good',icon:'🔥',title:`${streak}-Day Logging Streak — Keep it up!`,desc:`You've logged your morning routine for ${streak} consecutive days. Consistency like this is one of the most reliable predictors of long-term wellness success.`});
+  // Pattern 5: Stress vs productivity correlation
+  if(thisWeek.length>=3){const highStressDays=thisWeek.filter(c=>parseInt(c.stress)>=7);const highProdDays=thisWeek.filter(c=>parseInt(c.productivity)>=7);if(highStressDays.length>highProdDays.length)alerts.push({type:'warn',icon:'📉',title:'Stress–Productivity Mismatch',desc:`On your high-stress days this week, productivity was lower than expected. High stress is costing you output — the solution is counterintuitively to work less and rest more.`});}
+  if(!alerts.length)alerts.push({type:'good',icon:'✅',title:'No Warning Patterns Detected',desc:'Your data looks balanced this week. Continue logging daily to catch any early warning signs before they become serious.'});
+  wrap.innerHTML=alerts.map(a=>`<div class="pattern-alert ${a.type}"><div class="pattern-icon">${a.icon}</div><div class="pattern-body"><div class="pattern-title">${a.title}</div><div class="pattern-desc">${a.desc}</div></div></div>`).join('');
+}
+
+function renderPersonalRecs(thisWeek,mArr){
+  const wrap=document.getElementById('personalRecs');
+  if(!thisWeek.length&&!mArr.length){wrap.innerHTML='<p style="color:var(--text3);font-size:.88rem">Save a morning routine and at least one check-in to receive personalised recommendations.</p>';return;}
+  const recs=[];
+  const avgStress=avg(thisWeek,'stress');
+  const avgEnergy=avg(thisWeek,'energy');
+  const avgProd=avg(thisWeek,'productivity');
+  const avgWater=avg(thisWeek,'water');
+  const recentSleep=mArr.length?parseFloat(mArr[mArr.length-1].sleepHours||0):null;
+
+  if(avgStress&&avgStress>=7)recs.push({priority:'high',icon:'🧘',title:'Start a Daily 10-Minute Meditation Practice',desc:'Your stress data shows a pattern of elevated tension. Research shows just 10 minutes of daily mindfulness measurably lowers cortisol within 2 weeks. Try the 4-7-8 breathing tool in the Tools tab.',tag:'High Priority'});
+  if(recentSleep&&recentSleep<7)recs.push({priority:'high',icon:'🛏',title:'Shift Bedtime Earlier by 30 Minutes',desc:`You're averaging ${recentSleep}h of sleep — below the recommended 7–9h. Going to bed 30 minutes earlier tonight would immediately improve tomorrow's energy, mood, and stress tolerance.`,tag:'High Priority'});
+  if(avgEnergy&&avgEnergy<5)recs.push({priority:'high',icon:'🏃',title:'Add a 15-Minute Walk After Lunch',desc:'Low energy is often caused by physical inactivity during the day. A short post-lunch walk boosts energy for 2+ hours, improves focus, and reduces afternoon stress spikes.',tag:'High Priority'});
+  if(avgWater&&avgWater<5)recs.push({priority:'med',icon:'💧',title:'Set Hourly Water Reminders',desc:`You're averaging ${avgWater.toFixed(1)} glasses — dehydration reduces cognitive performance by up to 20%. Set a phone reminder every hour to drink one glass.`,tag:'Moderate'});
+  if(avgProd&&avgProd<5)recs.push({priority:'med',icon:'🎯',title:'Try Time-Blocking for Your Top 3 Tasks',desc:'Your productivity data suggests difficulty sustaining focus. Tomorrow morning, write down just 3 tasks — no more. Work in 25-minute Pomodoro blocks. This alone can double output.',tag:'Moderate'});
+  if(mArr.length){const activities=mArr.slice(-5).map(r=>Object.values(r.activities||{}).filter(Boolean).length);const avgActs=activities.reduce((a,b)=>a+b,0)/activities.length;if(avgActs<4)recs.push({priority:'med',icon:'☀️',title:'Complete at Least 4 Morning Activities',desc:`You're averaging ${avgActs.toFixed(1)} morning activities. Research shows that completing 4+ morning rituals creates a psychological momentum effect that carries through the entire day.`,tag:'Moderate'});}
+  if(avgStress&&avgStress<=4&&avgEnergy&&avgEnergy>=6)recs.push({priority:'low',icon:'🌱',title:'Add a New Challenge This Week',desc:"Your metrics show you're in a good place. This is the perfect time to take on a new healthy habit — try cold showers, a new form of exercise, or starting a gratitude journal.",tag:'Growth'});
+  if(!recs.length)recs.push({priority:'low',icon:'🌟',title:'Your Wellness Profile Looks Balanced',desc:'Keep logging consistently. Premium recommendations become more precise and personalised as you accumulate more data across different days and situations.',tag:'Positive'});
+
+  wrap.innerHTML=recs.slice(0,6).map(r=>`<div class="rec-card rec-priority-${r.priority==='high'?'high':r.priority==='med'?'med':'low'}"><div class="rec-icon-wrap">${r.icon}</div><div class="rec-body"><div class="rec-title">${r.title}</div><div class="rec-desc">${r.desc}</div><span class="rec-tag tag-${r.priority==='high'?'high':r.priority==='med'?'med':'low'}">${r.tag}</span></div></div>`).join('');
+}
+
+function renderHabitCal(mArr){
+  const loggedDates=new Set(mArr.map(r=>r.date));
+  const today=new Date();
+  const todayStr=today.toLocaleDateString();
+  let html='';
+  // Build 30-day grid starting from nearest Sunday
+  const startDate=new Date(today);
+  startDate.setDate(today.getDate()-29);
+  // pad to Sunday
+  const firstDay=startDate.getDay();
+  for(let i=0;i<firstDay;i++)html+='<div></div>';
+  for(let i=0;i<30;i++){
+    const d=new Date(startDate);d.setDate(startDate.getDate()+i);
+    const ds=d.toLocaleDateString();
+    const logged=loggedDates.has(ds);
+    const isToday=ds===todayStr;
+    html+=`<div class="cal-day ${logged?'logged':'empty'} ${isToday?'today':''}" title="${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}">${d.getDate()}</div>`;
+  }
+  document.getElementById('habitCal').innerHTML=html;
+}
+
+function renderWeeklyReport(thisWeek,prevWeek,mArr){
+  const today=new Date();
+  // Week label
+  const weekStart=new Date(today);weekStart.setDate(today.getDate()-today.getDay());
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
+  document.getElementById('reportWeekLabel').textContent=weekStart.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+weekEnd.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+
+  if(!thisWeek.length){
+    document.getElementById('reportScore').textContent='—';
+    document.getElementById('reportGrade').textContent='Log data this week to generate your score';
+    document.getElementById('reportMetrics').innerHTML='';
+    document.getElementById('reportInsights').innerHTML='<p style="color:var(--text3);font-size:.85rem">No data this week yet.</p>';
+    return;
+  }
+
+  const aStress=avg(thisWeek,'stress')||5;
+  const aEnergy=avg(thisWeek,'energy')||5;
+  const aProd=avg(thisWeek,'productivity')||5;
+  const aWater=avg(thisWeek,'water')||4;
+  const weekSleep=mArr.filter(r=>{const d=new Date(r.date);const diff=Math.round((today-d)/86400000);return diff>=0&&diff<7;});
+  const aSleep=weekSleep.length?weekSleep.reduce((s,r)=>s+parseFloat(r.sleepHours||0),0)/weekSleep.length:7;
+  const logDays=new Set(thisWeek.map(c=>c.date)).size;
+
+  // Score: sleep(25) + energy(20) + stress_inv(25) + prod(15) + water(10) + consistency(5)
+  const sleepScore=Math.min(25,Math.round((Math.min(aSleep,9)/9)*25));
+  const energyScore=Math.round((aEnergy/10)*20);
+  const stressScore=Math.round(((10-aStress)/10)*25);
+  const prodScore=Math.round((aProd/10)*15);
+  const waterScore=Math.round((Math.min(aWater,8)/8)*10);
+  const consScore=Math.min(5,logDays);
+  const total=sleepScore+energyScore+stressScore+prodScore+waterScore+consScore;
+
+  let grade,gradeColor;
+  if(total>=85){grade='Excellent 🏆';gradeColor='var(--green)';}
+  else if(total>=70){grade='Good 👍';gradeColor='var(--accent2)';}
+  else if(total>=55){grade='Fair ⚠️';gradeColor='var(--yellow)';}
+  else{grade='Needs Attention 🔴';gradeColor='var(--red)';}
+
+  document.getElementById('reportScore').textContent=total;
+  document.getElementById('reportScore').style.color=gradeColor;
+  document.getElementById('reportGrade').textContent=grade;
+  document.getElementById('reportGrade').style.color=gradeColor;
+
+  // Metric cards with prev week comparison
+  const pStress=avg(prevWeek,'stress');const pEnergy=avg(prevWeek,'energy');const pProd=avg(prevWeek,'productivity');
+  const metricDef=[
+    {label:'Avg Sleep',val:aSleep.toFixed(1)+'h',prev:null,unit:'',good:aSleep>=7,inverted:false},
+    {label:'Avg Stress',val:aStress.toFixed(1),prev:pStress,unit:'/10',good:aStress<=5,inverted:true},
+    {label:'Avg Energy',val:aEnergy.toFixed(1),prev:pEnergy,unit:'/10',good:aEnergy>=6,inverted:false},
+    {label:'Avg Productivity',val:aProd.toFixed(1),prev:pProd,unit:'/10',good:aProd>=6,inverted:false},
+    {label:'Avg Water',val:aWater.toFixed(1),prev:null,unit:' glasses',good:aWater>=6,inverted:false},
+    {label:'Days Logged',val:logDays,prev:null,unit:' days',good:logDays>=5,inverted:false},
+  ];
+  document.getElementById('reportMetrics').innerHTML=metricDef.map(m=>{
+    let changeHtml='';
+    if(m.prev!==null){
+      const diff=parseFloat(m.val)-m.prev;const better=m.inverted?diff<0:diff>0;
+      changeHtml=`<div class="report-metric-change" style="color:${better?'var(--green)':Math.abs(diff)<0.3?'var(--text3)':'var(--red)'}">${diff>0?'▲':'▼'} ${Math.abs(diff).toFixed(1)} vs last wk</div>`;
+    }
+    return`<div class="report-metric"><div class="report-metric-label">${m.label}</div><div class="report-metric-val" style="color:${m.good?'var(--green)':'var(--red)'}">${m.val}${m.unit}</div>${changeHtml}</div>`;
+  }).join('');
+
+  // Insights
+  const insights=[];
+  if(aSleep>=7)insights.push({color:'var(--green)',text:`Strong sleep this week — averaging ${aSleep.toFixed(1)}h which supports cognitive recovery and emotional resilience.`});
+  else insights.push({color:'var(--red)',text:`Sleep was below target this week at ${aSleep.toFixed(1)}h avg. Prioritise an earlier bedtime next week.`});
+  if(aStress<=4)insights.push({color:'var(--green)',text:`Excellent stress management — your average of ${aStress.toFixed(1)}/10 indicates effective coping strategies.`});
+  else if(aStress>=7)insights.push({color:'var(--red)',text:`Stress was high this week (${aStress.toFixed(1)}/10 avg). Next week, add one planned recovery activity per day.`});
+  if(logDays>=5)insights.push({color:'var(--green)',text:`Great consistency — you logged ${logDays} out of 7 days. Consistent tracking is itself a wellness-protective habit.`});
+  else insights.push({color:'var(--yellow)',text:`You logged ${logDays} day${logDays!==1?'s':''} this week. Aim for daily logging next week to spot patterns earlier.`});
+  if(aEnergy<5&&aStress>6)insights.push({color:'var(--red)',text:'The combination of low energy and high stress this week is a classic early burnout signal. Take restorative action before next week.'});
+  if(pStress&&aStress<pStress-1)insights.push({color:'var(--green)',text:`Stress improved significantly from last week (${pStress.toFixed(1)} → ${aStress.toFixed(1)}). Whatever you changed — keep doing it.`});
+
+  document.getElementById('reportInsights').innerHTML=insights.map(i=>`<div class="insight-item"><div class="insight-dot" style="background:${i.color}"></div><div class="insight-text">${i.text}</div></div>`).join('');
+}
+
+function downloadWeeklyReport(){
+  const today=new Date();
+  const thisWeek=getWeekData(7);
+  const mArr=getStore('morningRoutines').filter(r=>{const d=new Date(r.date);return Math.round((today-d)/86400000)<7;});
+  const nArr=getStore('nightRoutines').filter(r=>{const d=new Date(r.date);return Math.round((today-d)/86400000)<7;});
+  const jArr=getStore('journalEntries').filter(r=>{const d=new Date(r.date);return Math.round((today-d)/86400000)<7;});
+
+  const aStress=avg(thisWeek,'stress');
+  const aEnergy=avg(thisWeek,'energy');
+  const aProd=avg(thisWeek,'productivity');
+  const aSleep=mArr.length?mArr.reduce((s,r)=>s+parseFloat(r.sleepHours||0),0)/mArr.length:null;
+
+  let report=`BURNOUT WELLNESS — WEEKLY REPORT\n`;
+  report+=`Week of: ${today.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}\n`;
+  report+=`Generated: ${new Date().toLocaleString()}\n`;
+  report+=`${'='.repeat(50)}\n\n`;
+  report+=`WEEKLY SUMMARY\n${'─'.repeat(30)}\n`;
+  report+=`Check-ins logged: ${thisWeek.length}\n`;
+  report+=`Days with data: ${new Set(thisWeek.map(c=>c.date)).size}\n`;
+  report+=`Morning routines: ${mArr.length}\n`;
+  report+=`Evening routines: ${nArr.length}\n`;
+  report+=`Journal entries: ${jArr.length}\n\n`;
+  report+=`AVERAGE METRICS\n${'─'.repeat(30)}\n`;
+  if(aSleep)report+=`Sleep: ${aSleep.toFixed(1)} hours/night\n`;
+  if(aStress)report+=`Stress: ${aStress.toFixed(1)}/10\n`;
+  if(aEnergy)report+=`Energy: ${aEnergy.toFixed(1)}/10\n`;
+  if(aProd)report+=`Productivity: ${aProd.toFixed(1)}/10\n\n`;
+  report+=`DAILY CHECK-IN LOG\n${'─'.repeat(30)}\n`;
+  thisWeek.forEach(c=>{report+=`[${c.date} ${c.time}] Mood:${c.mood} Stress:${c.stress}/10 Energy:${c.energy}/10 Prod:${c.productivity}/10 Water:${c.water||0}/8\n`;if(c.reflection)report+=`  Note: ${c.reflection}\n`;});
+  report+=`\nMORNING ROUTINES\n${'─'.repeat(30)}\n`;
+  mArr.forEach(r=>{report+=`[${r.date}] Sleep:${r.sleepHours}h Quality:${r.sleepQuality} Mood:${r.mood} Activities:${Object.values(r.activities||{}).filter(Boolean).length}/8\n`;});
+  report+=`\nJOURNAL ENTRIES\n${'─'.repeat(30)}\n`;
+  jArr.forEach(j=>{report+=`[${j.timestamp}] (${j.mood})\n${j.text}\n\n`;});
+  report+=`${'='.repeat(50)}\nBurnout Wellness Dashboard — Premium Report`;
+
+  dl(report,'text/plain',`wellness-weekly-${today.toISOString().split('T')[0]}.txt`);
+  toast('📥 Weekly report downloaded!');
+}
+
+// ====== UTILS ======
+function confetti(){const colors=['#6c63ff','#00d4aa','#ff6b9d','#ffd166','#fff'];for(let i=0;i<12;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${20+Math.random()*60}%;top:${20+Math.random()*20}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.4}s;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px`;document.body.appendChild(p);setTimeout(()=>p.remove(),1200);}}
+function getStore(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}}
+function setStore(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function exportJSON(){const data={morningRoutines:getStore('morningRoutines'),nightRoutines:getStore('nightRoutines'),checkIns:getStore('checkIns'),journalEntries:getStore('journalEntries'),exportDate:new Date().toLocaleString()};dl(JSON.stringify(data,null,2),'application/json','wellness-'+today()+'.json');toast('📥 Exported as JSON!');}
+function exportCSV(){const ci=getStore('checkIns');let csv='Date,Time,Mood,Stress,Energy,Productivity,Water,Notes\n';ci.forEach(c=>{csv+=`"${c.date}","${c.time}","${c.mood}","${c.stress}","${c.energy}","${c.productivity}","${c.water||0}","${(c.reflection||'').replace(/"/g,'""')}"\n`;});dl(csv,'text/csv','checkins-'+today()+'.csv');toast('📊 Exported as CSV!');}
+function dl(content,type,filename){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=filename;a.click();}
+function clearData(){if(confirm('Delete all wellness data? This cannot be undone.')){['morningRoutines','nightRoutines','checkIns','journalEntries','morningData','nightData','goals','pomoSessions'].forEach(k=>localStorage.removeItem(k));toast('🗑️ All data cleared','warn');setTimeout(()=>location.reload(),1000);}}
+function today(){return new Date().toISOString().split('T')[0]}
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  loadMornHistory();loadNightHistory();loadCIHistory();renderGoals();renderJournal();updateQuick();
+  document.getElementById('pomoSessions').textContent=getStore('pomoSessions')||0;
+  updatePomoDisplay();
+  document.getElementById('windDown').oninput=()=>document.getElementById('snWD').textContent=document.getElementById('windDown').value;
+  document.getElementById('bedTime').oninput=()=>document.getElementById('snBed').textContent=document.getElementById('bedTime').value;
+});
+</script>
+</body>
+</html>
